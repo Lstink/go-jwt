@@ -27,7 +27,7 @@ func NewJwt() *Jwt {
 }
 
 func (t *Jwt) Encode() string {
-	return "This is Jwt"
+	return "This is Jwt for v0.0.2"
 }
 
 func (t *Jwt) Decode(jwt, key string) (payload *Payload, err error) {
