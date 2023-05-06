@@ -26,8 +26,45 @@ func NewJwt() *Jwt {
 	return &Jwt{}
 }
 
-func (t *Jwt) Encode() string {
-	return "This is Jwt for v0.0.3"
+const alg = "HS256"
+
+func (t *Jwt) Encode(payload *Payload, key string) (token string, err error) {
+	header := map[string]string{
+		"typ": "JWT",
+		"alg": alg,
+	}
+	var (
+		headerByte  []byte
+		payloadByte []byte
+		segments    []string
+	)
+
+	if headerByte, err = json.Marshal(header); err != nil {
+		return
+	}
+
+	if payloadByte, err = json.Marshal(payload); err != nil {
+		return
+	}
+
+	segments = append(segments, t.urlSafeB64Encode(headerByte))
+	segments = append(segments, t.urlSafeB64Encode(payloadByte))
+	signingInput := strings.Join(segments, ".")
+	signature := t.sign([]byte(signingInput), []byte(key))
+	segments = append(segments, t.urlSafeB64Encode(signature))
+	token = strings.Join(segments, ".")
+	return
+}
+
+func (t *Jwt) urlSafeB64Encode(input []byte) string {
+	return base64.URLEncoding.EncodeToString(input)
+}
+
+// 签名
+func (t *Jwt) sign(input []byte, key []byte) []byte {
+	h := hmac.New(sha256.New, key)
+	h.Write(input)
+	return h.Sum(nil)
 }
 
 func (t *Jwt) Decode(jwt, key string) (payload *Payload, err error) {
@@ -68,7 +105,7 @@ func (t *Jwt) Decode(jwt, key string) (payload *Payload, err error) {
 	if err != nil {
 		return
 	}
-	if header.Alg != "HS256" {
+	if header.Alg != alg {
 		err = errors.New("token解析异常")
 		return
 	}

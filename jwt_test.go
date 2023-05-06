@@ -31,21 +31,6 @@ func TestJwt_Decode(t1 *testing.T) {
 	}
 }
 
-func TestJwt_Encode(t1 *testing.T) {
-	var tests []struct {
-		name string
-		want string
-	}
-	for _, tt := range tests {
-		t1.Run(tt.name, func(t1 *testing.T) {
-			t := &Jwt{}
-			if got := t.Encode(); got != tt.want {
-				t1.Errorf("Encode() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestJwt_urlSafeB64Decode(t1 *testing.T) {
 	type args struct {
 		input string
@@ -101,6 +86,71 @@ func TestNewJwt(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := NewJwt(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewJwt() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestJwt_Encode(t1 *testing.T) {
+	type args struct {
+		payload *Payload
+		key     string
+	}
+	var tests []struct {
+		name      string
+		args      args
+		wantToken string
+		wantErr   bool
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			t := &Jwt{}
+			gotToken, err := t.Encode(tt.args.payload, tt.args.key)
+			if (err != nil) != tt.wantErr {
+				t1.Errorf("Encode() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotToken != tt.wantToken {
+				t1.Errorf("Encode() gotToken = %v, want %v", gotToken, tt.wantToken)
+			}
+		})
+	}
+}
+
+func TestJwt_sign(t1 *testing.T) {
+	type args struct {
+		input []byte
+		key   []byte
+	}
+	var tests []struct {
+		name string
+		args args
+		want []byte
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			t := &Jwt{}
+			if got := t.sign(tt.args.input, tt.args.key); !reflect.DeepEqual(got, tt.want) {
+				t1.Errorf("sign() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestJwt_urlSafeB64Encode(t1 *testing.T) {
+	type args struct {
+		input []byte
+	}
+	var tests []struct {
+		name string
+		args args
+		want string
+	}
+	for _, tt := range tests {
+		t1.Run(tt.name, func(t1 *testing.T) {
+			t := &Jwt{}
+			if got := t.urlSafeB64Encode(tt.args.input); got != tt.want {
+				t1.Errorf("urlSafeB64Encode() = %v, want %v", got, tt.want)
 			}
 		})
 	}
