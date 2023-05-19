@@ -21,7 +21,7 @@ func main() {
 	payload := &jwt.Payload{
 		Exp: expire,
 		UserInfo: &jwt.UserInfo{
-			Id:   uid,
+			Id:   int64(uid),
 			Time: time.Now().Unix(),
 		},
 	}

@@ -16,7 +16,7 @@ import (
 )
 
 type UserInfo struct {
-	Id   int
+	Id   int64
 	Time int64
 }
 type Payload struct {
